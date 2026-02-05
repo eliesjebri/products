@@ -1,0 +1,30 @@
+node{
+
+  git branch: "main", url: "https://github.com/eliesjebri/products.git"
+
+  stage ('Build UAT image') {
+    sh "docker tag localhost:5000/jenkins-pipeline-example:dev localhost:5000/jenkins-pipeline-example:uat"
+    sh "docker push localhost:5000/jenkins-pipeline-example:uat"
+  }
+
+  stage ('Deploy UAT') {
+    sh "docker rm -f app-uat &>/dev/null && sleep 1 && docker run --name=app-uat -p 8085:8085 --net jenkins-pipeline-example_default -e SPRING_PROFILES_ACTIVE=uat -d localhost:5000/jenkins-pipeline-example:uat"
+  }
+
+  stage ('UI Tests') {
+    withEnv(["JAVA_HOME=${ tool "java-21" }"]) {
+        sh "sleep 5"
+        sh './gradlew clean uiTest'
+    }   
+  }
+
+  stage ('Build PRD image') {
+    sh "docker tag localhost:5000/jenkins-pipeline-example:uat localhost:5000/jenkins-pipeline-example:prd"
+    sh "docker push localhost:5000/jenkins-pipeline-example:prd"
+  }
+
+  stage ('Deploy PRD') {
+    sh "docker rm -f app-prd &>/dev/null && sleep 1 && docker run --name=app-prd -p 8090:8090 --net jenkins-pipeline-example_default -e SPRING_PROFILES_ACTIVE=prd -d localhost:5000/jenkins-pipeline-example:prd"
+  }
+
+}

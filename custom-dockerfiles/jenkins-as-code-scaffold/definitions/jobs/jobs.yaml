@@ -1,0 +1,30 @@
+jobs:
+  - script: >
+      pipelineJob('products-ci') {
+        definition {
+          cpsScm {
+              scm {
+                git {
+                    remote { url 'https://github.com/eliesjebri/products.git' }
+                    branch '*/main'
+                }
+              }
+              scriptPath 'jenkinsfiles/ci/Jenkinsfile'
+          }
+        }
+      }
+
+  - script: >
+      pipelineJob('products-cd') {
+        definition {
+          cpsScm {
+              scm {
+                git {
+                    remote { url 'https://github.com/eliesjebri/products.git' }
+                    branch '*/main'
+                }
+              }
+              scriptPath 'jenkinsfiles/pipeline/Jenkinsfile'
+          }
+        }
+      }
